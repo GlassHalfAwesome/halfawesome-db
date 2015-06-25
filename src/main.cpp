@@ -72,6 +72,7 @@ int main(int argc, char *argv[]) {
 	while(true){
 		process();
 		sleep(60);
+		exit(EXIT_SUCCESS);
 	}
 
 	// Close the log
