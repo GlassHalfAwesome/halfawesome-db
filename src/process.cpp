@@ -1,0 +1,3 @@
+void process() {
+	// Do work
+}

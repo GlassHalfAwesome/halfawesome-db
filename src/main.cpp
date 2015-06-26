@@ -11,9 +11,7 @@
 
 #define DAEMON_NAME "HalfAwesome Database"
 
-void process() {
-	// Do work
-}
+void process();
 
 int main(int argc, char *argv[]) {
 	// Sets the log mask
@@ -23,14 +21,13 @@ int main(int argc, char *argv[]) {
 	// I don't know what most of these parameters do
 	openlog(DAEMON_NAME, LOG_CONS | LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_USER);
 
-	// I dont think this actually makes it to the syslog because of the log mask
-	syslog(LOG_NOTICE, "Starting Daemon.");
-
 	// I don't know why we're using pid_t instead of an int, I guess for portability
 	pid_t pid, sid;
 
 	// Creates a child process for the daemon
 	pid = fork();
+
+	syslog(LOG_INFO, "HalfAwesome Database daemon started.");
 
 	// Exits if it failed to create the child process
 	// This is a bad thing
