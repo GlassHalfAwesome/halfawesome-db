@@ -62,9 +62,9 @@ int main(int argc, char *argv[]) {
 
 	int i = 0;
 	// Main Process
-	while(i <= 5){
+	while(i < 5){
 		process();
-		sleep(5);
+		sleep(2);
 		i++;
 	}
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <syslog.h>
 
 bool exists(const std::string& filename) {
@@ -16,13 +17,33 @@ void create(const std::string& filename) {
 	if (exists(filename)) {
 		syslog(LOG_ERR, "Create failed: file already exists.");
 	} else {
-		std::ofstream testfile;
+		std::ofstream file;
 
-		testfile.open(filename);
-		testfile << "Writing to a file.\n";
-		testfile.close();
+		file.open(filename); // I should error check this
+		file << "Creating.\n";
+		file.close();
 	}
 
+}
+
+void update(const std::string& filename) {
+	if (exists(filename)) {
+		std::ofstream file;
+
+		file.open(filename, std::ios_base::app); // I should error check this
+		file << "Appending.\n";
+		file.close();
+	} else {
+		syslog(LOG_ERR, "Update failed: file doesn't exist.");
+	}
+}
+
+void del(const std::string& filename) {
+	if (exists(filename)) {
+		std::remove(filename.data()); // I should error check this
+	} else {
+		syslog(LOG_ERR, "Delete failed: file doesn't exist.");
+	}
 }
 
 void process() {
@@ -33,4 +54,7 @@ void process() {
 
 	std::string filename = ss.str();
 	create(filename);
+	update(filename);
+	sleep(2);
+	del(filename);
 }
