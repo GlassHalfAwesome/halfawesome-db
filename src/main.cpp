@@ -1,19 +1,12 @@
-// pid_t, umask()
-#include <sys/types.h>
-// umask()
-#include <sys/stat.h>
-// exit()
-#include <cstdlib>
-// setsid()
-#include <unistd.h>
-// openlog(), syslog(), closelog(), setlogmask()
-#include <syslog.h>
+#include <sys/types.h> // pid_t, umask()
+#include <sys/stat.h> // umask()
+#include <cstdlib> // exit()
+#include <unistd.h> // setsid()
+#include <syslog.h> // openlog(), syslog(), closelog(), setlogmask()
+
+#include "process.h"
 
 #define DAEMON_NAME "HalfAwesome Database"
-
-void process() {
-	// Do work
-}
 
 int main(int argc, char *argv[]) {
 	// Sets the log mask
@@ -23,14 +16,13 @@ int main(int argc, char *argv[]) {
 	// I don't know what most of these parameters do
 	openlog(DAEMON_NAME, LOG_CONS | LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_USER);
 
-	// I dont think this actually makes it to the syslog because of the log mask
-	syslog(LOG_NOTICE, "Starting Daemon.");
-
 	// I don't know why we're using pid_t instead of an int, I guess for portability
 	pid_t pid, sid;
 
 	// Creates a child process for the daemon
 	pid = fork();
+
+	syslog(LOG_INFO, "Halfawesome Database Daemon started.");
 
 	// Exits if it failed to create the child process
 	// This is a bad thing
@@ -68,11 +60,12 @@ int main(int argc, char *argv[]) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
+	int i = 0;
 	// Main Process
-	while(true){
+	while(i < 5){
 		process();
-		sleep(60);
-		exit(EXIT_SUCCESS);
+		sleep(2);
+		i++;
 	}
 
 	// Close the log
