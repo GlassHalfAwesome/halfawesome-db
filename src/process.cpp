@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -19,31 +18,35 @@ std::vector<std::string> parser(const std::string& query) {
 	std::stringstream ss {query};
 	std::string s;
 
-	while (std::getline(ss, s, ' ') {
+	while (std::getline(ss, s, ' ')) {
 	elems.push_back(s);
 	}
 
 	return elems;
 }
 
-void create(const std::string& filename) {
-	if (exists(filename)) {
+void create(const std::vector<std::string>& parsed) {
+	if (exists(parsed[1])) {
 		syslog(LOG_ERR, "Create failed: file already exists.");
 	} else {
 		std::ofstream file;
 
-		file.open(filename); // I should error check this
+		file.open(parsed[1]); // I should error check this
 		file << "Creating.\n";
 		file.close();
 	}
 
 }
 
-void update(const std::string& filename) {
-	if (exists(filename)) {
+void select(const std::vector<std::string>& parsed) {
+	// Do work
+}
+
+void update(const std::vector<std::string>& parsed) {
+	if (exists(parsed[1])) {
 		std::ofstream file;
 
-		file.open(filename, std::ios_base::app); // I should error check this
+		file.open(parsed[1], std::ios_base::app); // I should error check this
 		file << "Appending.\n";
 		file.close();
 	} else {
@@ -51,23 +54,30 @@ void update(const std::string& filename) {
 	}
 }
 
-void del(const std::string& filename) {
-	if (exists(filename)) {
-		std::remove(filename.data()); // I should error check this
+void del(const std::vector<std::string>& parsed) {
+	if (exists(parsed[1])) {
+		std::remove(parsed[1].data()); // I should error check this
 	} else {
 		syslog(LOG_ERR, "Delete failed: file doesn't exist.");
 	}
 }
 
+void interpreter(const std::string& query) {
+	std::vector<std::string> parsed {parser(query)};
+
+	if (parsed[0] == "CREATE") {
+		create(parsed);
+	} else if (parsed[0] == "SELECT") {
+		select(parsed);
+	} else if (parsed[0] == "UPDATE") {
+		update(parsed);
+	} else if (parsed[0] == "DELETE") {
+		del(parsed);
+	} else {
+		syslog(LOG_ERR, "Your query sucks");
+	}
+}
+
 void process() {
-	std::time_t timestamp {std::time(nullptr)};
-	std::stringstream ss;
-
-	ss << timestamp << ".txt";
-
-	std::string filename = ss.str();
-	create(filename);
-	update(filename);
-	sleep(2);
-	del(filename);
+	
 }
