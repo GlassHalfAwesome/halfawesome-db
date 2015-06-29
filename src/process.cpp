@@ -3,6 +3,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
+#include <vector>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <syslog.h>
@@ -10,7 +11,19 @@
 bool exists(const std::string& filename) {
 	struct stat buffer;   
 
-	return stat(filename.c_str(), &buffer) == 0; 
+	return stat(filename.data(), &buffer) == 0; 
+}
+
+std::vector<std::string> parser(const std::string& query) {
+	std::vector<std::string> elems;
+	std::stringstream ss {query};
+	std::string s;
+
+	while (std::getline(ss, s, ' ') {
+	elems.push_back(s);
+	}
+
+	return elems;
 }
 
 void create(const std::string& filename) {
