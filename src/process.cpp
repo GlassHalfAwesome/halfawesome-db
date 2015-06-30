@@ -7,6 +7,10 @@
 #include <unistd.h>
 #include <syslog.h>
 
+void error(const std::string& error) {
+	std::cout << error << '\n';	
+}
+
 bool exists(const std::string& filename) {
 	struct stat buffer;   
 
@@ -27,7 +31,7 @@ std::vector<std::string> parser(const std::string& query) {
 
 void create(const std::vector<std::string>& parsed) {
 	if (exists(parsed[1])) {
-		syslog(LOG_ERR, "Create failed: file already exists.");
+		error("Create failed: file already exists.");
 	} else {
 		std::ofstream file;
 
@@ -50,7 +54,7 @@ void update(const std::vector<std::string>& parsed) {
 		file << "Appending.\n";
 		file.close();
 	} else {
-		syslog(LOG_ERR, "Update failed: file doesn't exist.");
+		error("Update failed: file doesn't exist.");
 	}
 }
 
@@ -58,7 +62,7 @@ void del(const std::vector<std::string>& parsed) {
 	if (exists(parsed[1])) {
 		std::remove(parsed[1].data()); // I should error check this
 	} else {
-		syslog(LOG_ERR, "Delete failed: file doesn't exist.");
+		error("Delete failed: file doesn't exist.");
 	}
 }
 
@@ -74,10 +78,11 @@ void interpreter(const std::string& query) {
 	} else if (parsed[0] == "DELETE") {
 		del(parsed);
 	} else {
-		syslog(LOG_ERR, "Your query sucks");
+		error("Your query sucks.");
 	}
 }
 
-void process() {
-	
+void process(const std::string& query) {
+	std::cout << query << '\n';
+	interpreter(query);
 }
