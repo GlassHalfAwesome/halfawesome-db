@@ -8,7 +8,11 @@
 #include <syslog.h>
 
 void error(const std::string& error) {
-	std::cout << error << '\n';	
+	std::ofstream file;
+
+	file.open("logs/errors", std::ios_base::app); // I should error check this
+	file << error << '\n';
+	file.close();
 }
 
 bool exists(const std::string& filename) {
@@ -23,7 +27,7 @@ std::vector<std::string> parser(const std::string& query) {
 	std::string s;
 
 	while (std::getline(ss, s, ' ')) {
-	elems.push_back(s);
+		elems.push_back(s);
 	}
 
 	return elems;
@@ -68,21 +72,23 @@ void del(const std::vector<std::string>& parsed) {
 
 void interpreter(const std::string& query) {
 	std::vector<std::string> parsed {parser(query)};
-
-	if (parsed[0] == "CREATE") {
-		create(parsed);
-	} else if (parsed[0] == "SELECT") {
-		select(parsed);
-	} else if (parsed[0] == "UPDATE") {
-		update(parsed);
-	} else if (parsed[0] == "DELETE") {
-		del(parsed);
+	if (parsed.size() > 1) {
+		if (parsed[0] == "CREATE") {
+			create(parsed);
+		} else if (parsed[0] == "SELECT") {
+			select(parsed);
+		} else if (parsed[0] == "UPDATE") {
+			update(parsed);
+		} else if (parsed[0] == "DELETE") {
+			del(parsed);
+		} else {
+			error("Query failed: keyword doesn't exist.");
+		}
 	} else {
-		error("Your query sucks.");
+		error("Query failed: filename not specified.");
 	}
 }
 
 void process(const std::string& query) {
-	std::cout << query << '\n';
 	interpreter(query);
 }

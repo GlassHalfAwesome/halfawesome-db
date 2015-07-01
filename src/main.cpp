@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
 	// Close the standard file descriptors
 	close(STDIN_FILENO);
-	//close(STDOUT_FILENO);
+	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	//int i = 0;
