@@ -69,7 +69,9 @@ namespace kw {
 			std::ofstream file;
 
 			file.open(parsed[1], std::ios_base::app); // I should error check this
-			file << "Appending.\n";
+			for (unsigned int i = 2; i < parsed.size(); i++) {
+				file << parsed[i] << '\n';
+			}
 			file.close();
 		} else {
 			log::error("Update failed: file doesn't exist.");
@@ -93,14 +95,16 @@ void interpreter(const std::string& query) {
 		} else if (parsed[0] == "SELECT") {
 			kw::select(parsed);
 		} else if (parsed[0] == "UPDATE") {
-			kw::update(parsed);
+			if (parsed.size() > 2) {
+				kw::update(parsed);
+			}
 		} else if (parsed[0] == "DELETE") {
 			kw::del(parsed);
 		} else {
 			log::error("Query failed: keyword doesn't exist.");
 		}
 	} else {
-		log::error("Query failed: filename not specified.");
+		log::error("Query failed: insufficient parameters.");
 	}
 }
 
