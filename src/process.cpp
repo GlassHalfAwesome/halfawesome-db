@@ -68,8 +68,10 @@ namespace kw {
 
 	void update(std::vector<std::string>& parsed) {
 		if (util::exists(parsed[1])) {
-			std::ifstream file(parsed[1]);
-			std::ofstream tempfile(parsed[1] + ".tmp");
+			std::string oldfn{parsed[1]};
+			std::string newfn{parsed[1]  + ".tmp"};
+			std::ifstream file(oldfn);
+			std::ofstream tempfile(newfn);
 
 			if (!file || !tempfile) {
 				log::error("Update failed: unable to open file \"" + parsed[1] + "\" .");
@@ -78,7 +80,6 @@ namespace kw {
 
 				while (file >> tempstring) {
 					for (unsigned long int i {parsed.size()}; i > 2; i--) {
-						std::cout << parsed.size();
 						std::vector<std::string> queryval {util::parser(parsed[i-1], '=')};
 						std::vector<std::string> fileval {util::parser(tempstring, '=')};
 
@@ -91,6 +92,9 @@ namespace kw {
 					tempstring += '\n';
 					tempfile << tempstring;
 				}
+
+				std::remove(oldfn.data());
+				std::rename(newfn.data(), oldfn.data());
 			}
 		} else {
 			log::error("Update failed: file \"" + parsed[1] + "\" doesn't exist.");
