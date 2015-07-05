@@ -74,7 +74,11 @@ namespace kw {
 			std::ofstream tempfile(newfn);
 
 			if (!file || !tempfile) {
-				log::error("Update failed: unable to open file \"" + parsed[1] + "\" .");
+				if (!file) {
+					log::error("Update failed: unable to open file \"" + parsed[1] + "\" .");
+				} else {
+					log::error("Update failed: unable to create file \"" + parsed[1] + ".tmp\" .");
+				}
 			} else {
 				std::string tempstring;
 
@@ -110,23 +114,39 @@ namespace kw {
 	}
 }
 
+// Using if statements instead of switch to avoid having to map an enum to strings.
+// Should probably change it someday to help pretty up the code.
 void interpreter(const std::string& query) {
 	std::vector<std::string> parsed {util::parser(query, ' ')};
+	unsigned long int size {parsed.size()};
 	if (parsed.size() > 1) {
-		if (parsed[0] == "CREATE") {
+		if (parsed[0] == "CREATE" && size == 2) {
 			kw::create(parsed);
-		} else if (parsed[0] == "SELECT") {
+		} else if (parsed[0] == "SELECT" && size == 2) {
 			kw::select(parsed);
-		} else if (parsed[0] == "UPDATE") {
+		} else if (parsed[0] == "UPDATE" && size > 2) {
 			if (parsed.size() > 2) {
 				kw::update(parsed);
 			} else {
 				log::error("Update failed: insufficient parameters.");
 			}
-		} else if (parsed[0] == "DELETE") {
+		} else if (parsed[0] == "DELETE" && size == 2) {
 			kw::del(parsed);
 		} else {
-			log::error("Query failed: keyword \"" + parsed[0] + "\" doesn't exist.");
+			switch (size) {
+				case 0:
+					log::error("Query failed: empty query.");
+					break;
+				case 1:
+					log::error("Query failed: no filename.");
+					break;
+				case 2:
+					log::error("Query failed: keyword \"" + parsed[0] + "\" doesn't exist.");
+					break;
+				default:
+					log::error("Query failed: too many parameters.");
+					break;
+			}
 		}
 	} else {
 		log::error("Query failed: insufficient parameters.");
