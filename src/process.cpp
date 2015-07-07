@@ -34,7 +34,6 @@ namespace util {
 	}
 	
 	// I think I'll need to switch this to a list to make the update query more efficient.
-	// I'd like to be able to remove mayched entries
 	std::vector<std::string> parser(const std::string& query, const char& delim) {
 		std::vector<std::string> elems;
 		std::stringstream ss {query};
@@ -82,33 +81,30 @@ namespace kw {
 			} else {
 				std::string tempstring;
 				
-				int i {0};
+				int t {0}; // Counter for tab formatting
 				while (file >> tempstring) {
+					// Parses the update parameters
 					for (unsigned long int j {parsedQuery.size()}; j > 2; j--) {
 						std::vector<std::string> queryval {util::parser(parsedQuery[j - 1], '=')};
 						std::vector<std::string> fileval {util::parser(tempstring, '=')};
-
+						// Matches and replaces file data with query data
 						if (queryval[0] == fileval[0]) {
 							tempstring = parsedQuery[j - 1];
 							parsedQuery.erase(parsedQuery.begin() + j - 1);
 						}
 					}
-					
-					if (tempstring.find("}") != std::string::npos) {
-						i--;
-					}
-					for (int k = 0; k < i; k++) {
-					tempstring = '\t' + tempstring;
-					}
+
+					// Formats the output with tabs and commas
+					if (tempstring.find("}") != std::string::npos) { t--; }
+					for (int k = 0; k < t; k++) { tempstring = '\t' + tempstring; }
+					if (tempstring.find("{") != std::string::npos) { t++; }
+
 					tempstring += '\n';
-					if (tempstring.find("{") != std::string::npos) {
-						i++;
-					}
 					tempfile << tempstring;
 				}
 
-				std::remove(oldfn.data());
-				std::rename(newfn.data(), oldfn.data());
+				std::remove(oldfn.data()); // I should error check this
+				std::rename(newfn.data(), oldfn.data()); // I should error check this
 			}
 		} else {
 			log::error("Update failed: file \"" + parsedQuery[1] + "\" doesn't exist.");
