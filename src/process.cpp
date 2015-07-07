@@ -50,50 +50,60 @@ namespace util {
 
 // Keyword functions
 namespace kw {
-	void create(const std::vector<std::string>& parsed) {
-		if (util::exists(parsed[1])) {
-			log::error("Create failed: file \"" + parsed[1] + "\" already exists.");
+	void create(const std::vector<std::string>& parsedQuery) {
+		if (util::exists(parsedQuery[1])) {
+			log::error("Create failed: file \"" + parsedQuery[1] + "\" already exists.");
 		} else {
 			std::ofstream file;
 
-			file.open(parsed[1]); // I should error check this
+			file.open(parsedQuery[1]); // I should error check this
 			file << "Creating.\n";
 			file.close();
 		}
 	}
 
-	void select(const std::vector<std::string>& parsed) {
+	void select(const std::vector<std::string>& parsedQuery) {
 		// Do work
 	}
 
-	void update(std::vector<std::string>& parsed) {
-		if (util::exists(parsed[1])) {
-			std::string oldfn{parsed[1]};
-			std::string newfn{parsed[1]  + ".tmp"};
+	void update(std::vector<std::string>& parsedQuery) {
+		if (util::exists(parsedQuery[1])) {
+			std::string oldfn{parsedQuery[1]};
+			std::string newfn{parsedQuery[1]  + ".tmp"};
 			std::ifstream file(oldfn);
 			std::ofstream tempfile(newfn);
 
 			if (!file || !tempfile) {
 				if (!file) {
-					log::error("Update failed: unable to open file \"" + parsed[1] + "\" .");
+					log::error("Update failed: unable to open file \"" + parsedQuery[1] + "\" .");
 				} else {
-					log::error("Update failed: unable to create file \"" + parsed[1] + ".tmp\" .");
+					log::error("Update failed: unable to create file \"" + parsedQuery[1] + ".tmp\" .");
 				}
 			} else {
 				std::string tempstring;
-
+				
+				int i {0};
 				while (file >> tempstring) {
-					for (unsigned long int i {parsed.size()}; i > 2; i--) {
-						std::vector<std::string> queryval {util::parser(parsed[i-1], '=')};
+					for (unsigned long int j {parsedQuery.size()}; j > 2; j--) {
+						std::vector<std::string> queryval {util::parser(parsedQuery[j - 1], '=')};
 						std::vector<std::string> fileval {util::parser(tempstring, '=')};
 
 						if (queryval[0] == fileval[0]) {
-							tempstring = parsed[i-1];
-							parsed.erase(parsed.begin() + i - 1);
+							tempstring = parsedQuery[j - 1];
+							parsedQuery.erase(parsedQuery.begin() + j - 1);
 						}
 					}
-
+					
+					if (tempstring.find("}") != std::string::npos) {
+						i--;
+					}
+					for (int k = 0; k < i; k++) {
+					tempstring = '\t' + tempstring;
+					}
 					tempstring += '\n';
+					if (tempstring.find("{") != std::string::npos) {
+						i++;
+					}
 					tempfile << tempstring;
 				}
 
@@ -101,15 +111,15 @@ namespace kw {
 				std::rename(newfn.data(), oldfn.data());
 			}
 		} else {
-			log::error("Update failed: file \"" + parsed[1] + "\" doesn't exist.");
+			log::error("Update failed: file \"" + parsedQuery[1] + "\" doesn't exist.");
 		}
 	}
 
-	void del(const std::vector<std::string>& parsed) {
-		if (util::exists(parsed[1])) {
-			std::remove(parsed[1].data()); // I should error check this
+	void del(const std::vector<std::string>& parsedQuery) {
+		if (util::exists(parsedQuery[1])) {
+			std::remove(parsedQuery[1].data()); // I should error check this
 		} else {
-			log::error("Delete failed: file \"" + parsed[1] + "\" doesn't exist.");
+			log::error("Delete failed: file \"" + parsedQuery[1] + "\" doesn't exist.");
 		}
 	}
 }
@@ -117,21 +127,21 @@ namespace kw {
 // Using if statements instead of switch to avoid having to map an enum to strings.
 // Should probably change it someday to help pretty up the code.
 void interpreter(const std::string& query) {
-	std::vector<std::string> parsed {util::parser(query, ' ')};
-	unsigned long int size {parsed.size()};
-	if (parsed.size() > 1) {
-		if (parsed[0] == "CREATE" && size == 2) {
-			kw::create(parsed);
-		} else if (parsed[0] == "SELECT" && size == 2) {
-			kw::select(parsed);
-		} else if (parsed[0] == "UPDATE" && size > 2) {
-			if (parsed.size() > 2) {
-				kw::update(parsed);
+	std::vector<std::string> parsedQuery {util::parser(query, ' ')};
+	unsigned long int size {parsedQuery.size()};
+	if (parsedQuery.size() > 1) {
+		if (parsedQuery[0] == "CREATE" && size == 2) {
+			kw::create(parsedQuery);
+		} else if (parsedQuery[0] == "SELECT" && size == 2) {
+			kw::select(parsedQuery);
+		} else if (parsedQuery[0] == "UPDATE" && size > 2) {
+			if (parsedQuery.size() > 2) {
+				kw::update(parsedQuery);
 			} else {
 				log::error("Update failed: insufficient parameters.");
 			}
-		} else if (parsed[0] == "DELETE" && size == 2) {
-			kw::del(parsed);
+		} else if (parsedQuery[0] == "DELETE" && size == 2) {
+			kw::del(parsedQuery);
 		} else {
 			switch (size) {
 				case 0:
@@ -141,7 +151,7 @@ void interpreter(const std::string& query) {
 					log::error("Query failed: no filename.");
 					break;
 				case 2:
-					log::error("Query failed: keyword \"" + parsed[0] + "\" doesn't exist.");
+					log::error("Query failed: keyword \"" + parsedQuery[0] + "\" doesn't exist.");
 					break;
 				default:
 					log::error("Query failed: too many parameters.");
