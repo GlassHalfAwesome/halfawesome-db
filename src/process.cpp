@@ -62,7 +62,17 @@ namespace kw {
 	}
 
 	void select(const std::vector<std::string>& parsedQuery) {
-		// Do work
+		if (util::exists(parsedQuery[1])) {
+			std::ifstream file(parsedQuery[1]);
+			std::vector<std::string> ouput;
+			std::string s;
+
+			while (file >> s) {
+				ouput.push_back(s);
+			}
+		} else {
+			log::error("Select failed: file \"" + parsedQuery[1] + "\" doesn't exist.");
+		}
 	}
 
 	void update(std::vector<std::string>& parsedQuery) {
@@ -94,7 +104,7 @@ namespace kw {
 						}
 					}
 
-					// Formats the output with tabs and commas
+					// Formats the output with tabs
 					if (tempstring.find("}") != std::string::npos) { t--; }
 					for (int k = 0; k < t; k++) { tempstring = '\t' + tempstring; }
 					if (tempstring.find("{") != std::string::npos) { t++; }
