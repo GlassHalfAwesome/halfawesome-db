@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <ctime>
+#include <string>
 
-void process();
+void process(const std::string&);

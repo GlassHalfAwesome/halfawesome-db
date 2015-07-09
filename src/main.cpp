@@ -60,13 +60,13 @@ int main(int argc, char *argv[]) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
-	int i = 0;
+	//int i = 0;
 	// Main Process
-	while(i < 5){
-		process();
-		sleep(2);
-		i++;
-	}
+	//while(i < 1){
+		process(argv[1]);
+		//sleep(1);
+		//i++;
+	//}
 
 	// Close the log
 	closelog ();
